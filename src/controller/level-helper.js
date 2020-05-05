@@ -27,7 +27,7 @@ export function addGroupId (level, type, id) {
 }
 
 export function updatePTS (fragments, fromIdx, toIdx) {
-  let fragFrom = fragments[fromIdx], fragTo = fragments[toIdx], fragToPTS = fragTo.startPTS;
+  let fragFrom = fragments[fromIdx]; let fragTo = fragments[toIdx]; let fragToPTS = fragTo.startPTS;
   // if we know startPTS[toIdx]
   if (Number.isFinite(fragToPTS)) {
     // update fragment duration.
@@ -86,7 +86,7 @@ export function updateFragPTSDTS (details, frag, startPTS, endPTS, startDTS, end
     return 0;
   }
 
-  let fragIdx, fragments, i;
+  let fragIdx; let fragments; let i;
   fragIdx = sn - details.startSN;
   fragments = details.fragments;
   // update frag reference in fragments array

@@ -35,6 +35,7 @@ class StreamController extends BaseStreamController {
       Event.FRAG_PARSING_INIT_SEGMENT,
       Event.FRAG_PARSING_DATA,
       Event.FRAG_PARSED,
+      Event.FRAG_SKIPPED,
       Event.ERROR,
       Event.AUDIO_TRACK_SWITCHING,
       Event.AUDIO_TRACK_SWITCHED,
@@ -833,6 +834,15 @@ class StreamController extends BaseStreamController {
       this.state = State.IDLE;
       this.tick();
     }
+  }
+
+  onFragSkipped (data) {
+    this.fragmentTracker.onFragSkipped(data);
+    this.state = State.IDLE;
+    this.startFragRequested = false;
+    this.pendingBuffering = true;
+    this.appended = false;
+    this.tick();
   }
 
   onFragLoaded (data) {

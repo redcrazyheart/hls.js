@@ -1,10 +1,12 @@
 import EventHandler from '../event-handler';
 import Event from '../events';
+import { logger } from '../utils/logger';
 
 export const FragmentState = {
   NOT_LOADED: 'NOT_LOADED',
   APPENDING: 'APPENDING',
   PARTIAL: 'PARTIAL',
+  SKIPPED: 'SKIPPED',
   OK: 'OK'
 };
 
@@ -43,6 +45,11 @@ export class FragmentTracker extends EventHandler {
     const fragments = this.fragments;
     const bufferedFrags = Object.keys(fragments).filter(key => {
       const fragmentEntity = fragments[key];
+
+      if (fragmentEntity && fragmentEntity.isSkipped) {
+        return false;
+      }
+
       if (fragmentEntity.body.type !== levelType) {
         return false;
       }
@@ -117,7 +124,7 @@ export class FragmentTracker extends EventHandler {
 
   getBufferedTimes (startPTS, endPTS, timeRange) {
     let fragmentTimes = [];
-    let startTime, endTime;
+    let startTime; let endTime;
     let fragmentPartial = false;
     for (let i = 0; i < timeRange.length; i++) {
       startTime = timeRange.start(i) - this.bufferPadding;
@@ -160,7 +167,7 @@ export class FragmentTracker extends EventHandler {
    * @returns {Object} fragment Returns a partial fragment at a time or null if there is no partial fragment
    */
   getPartialFragment (time) {
-    let timePadding, startTime, endTime;
+    let timePadding; let startTime; let endTime;
     let bestFragment = null;
     let bestOverlap = 0;
     Object.keys(this.fragments).forEach(key => {
@@ -191,7 +198,9 @@ export class FragmentTracker extends EventHandler {
     let state = FragmentState.NOT_LOADED;
 
     if (fragmentEntity !== undefined) {
-      if (!fragmentEntity.buffered) {
+      if (fragmentEntity.isSkipped) {
+        state = FragmentState.SKIPPED;
+      } else if (!fragmentEntity.buffered) {
         state = FragmentState.APPENDING;
       } else if (this.isPartial(fragmentEntity) === true) {
         state = FragmentState.PARTIAL;
@@ -210,7 +219,7 @@ export class FragmentTracker extends EventHandler {
   }
 
   isTimeBuffered (startPTS, endPTS, timeRange) {
-    let startTime, endTime;
+    let startTime; let endTime;
     for (let i = 0; i < timeRange.length; i++) {
       startTime = timeRange.start(i) - this.bufferPadding;
       endTime = timeRange.end(i) + this.bufferPadding;
@@ -242,6 +251,19 @@ export class FragmentTracker extends EventHandler {
       body: fragment,
       range: Object.create(null),
       buffered: false
+    };
+  }
+
+  /**
+   * Fires when a fragment loading is completed
+   */
+  onFragSkipped (e) {
+    const fragment = e.frag;
+
+    logger.log('Frag skipped', fragment);
+
+    this.fragments[this.getFragmentKey(fragment)] = {
+      isSkipped: true
     };
   }
 
