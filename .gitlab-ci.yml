@@ -41,5 +41,4 @@ publish_package:
   variables:
     NPM_TOKEN: $CI_JOB_TOKEN
   script:
-    - echo "${CI_SERVER_PROTOCOL}://${CI_SERVER_HOST}:${CI_SERVER_PORT}/api/v4/projects/${CI_PROJECT_ID}/packages/npm/:_authToken=${CI_JOB_TOKEN}">.npmrc
     - npm publish
