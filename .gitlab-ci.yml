@@ -39,7 +39,7 @@ create_npmrc:
 publish_package:
   stage: deploy
   variables:
-    NPM_TOKEN: ${CI_JOB_TOKEN}
+      NPM_TOKEN: ${CI_JOB_TOKEN}
   script:
     - |
       {
