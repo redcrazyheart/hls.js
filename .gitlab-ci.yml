@@ -41,4 +41,6 @@ publish_package:
   variables:
     NPM_TOKEN: $CI_JOB_TOKEN
   script:
+    - cat .npmrc
+    - echo CI_PROJECT_ROOT_NAMESPACE $CI_PROJECT_ROOT_NAMESPACE and $CI_SERVER_PROTOCOL
     - npm publish
