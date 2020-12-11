@@ -50,10 +50,6 @@ export default class LevelController extends EventHandler {
     if (levels) {
       levels.forEach(level => {
         level.loadError = 0;
-        const levelDetails = level.details;
-        if (levelDetails && levelDetails.live) {
-          level.details = undefined;
-        }
       });
     }
     // speed up live playlist refresh if timer exists
@@ -103,7 +99,6 @@ export default class LevelController extends EventHandler {
 
       if (attributes) {
         if (attributes.AUDIO) {
-          audioCodecFound = true;
           addGroupId(levelFromSet || level, 'audio', attributes.AUDIO);
         }
         if (attributes.SUBTITLES) {
@@ -145,7 +140,9 @@ export default class LevelController extends EventHandler {
         }
       }
 
-      // Audio is only alternate if manifest include a URI along with the audio group tag
+      // Audio is only alternate if manifest include a URI along with the audio group tag,
+      // and this is not an audio-only stream where levels contain audio-only
+      const audioOnly = audioCodecFound && !videoCodecFound;
       this.hls.trigger(Event.MANIFEST_PARSED, {
         levels,
         audioTracks,
@@ -153,7 +150,7 @@ export default class LevelController extends EventHandler {
         stats: data.stats,
         audio: audioCodecFound,
         video: videoCodecFound,
-        altAudio: audioTracks.some(t => !!t.url)
+        altAudio: !audioOnly && audioTracks.some(t => !!t.url)
       });
     } else {
       this.hls.trigger(Event.ERROR, {
